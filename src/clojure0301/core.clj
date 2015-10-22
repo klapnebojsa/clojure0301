@@ -277,15 +277,58 @@ realizing random number
    [(count d) (count t)])
 ;[1999988 12]
  
-(let [[t d] (split-with #(< % 12) (range 200000))]
+#_(let [[t d] (split-with #(< % 12) (range 20000000))]          ;bolja varijanta. zauzima manje prostora
   [(count t) (count d)])
+;[12 19999988]
 
+(def m {:a 1, :b 2, :c 3})
+(get m :b)
+;2
+(get m :d)
+;nil
+(get m :d "not-found")
+;"not-found"
+(assoc m :d 4)
+;{:c 3, :b 2, :d 4, :a 1}
+(dissoc m :b)
+;{:c 3, :a 1}
+(assoc m
+       :x 4
+       :y 5
+       :z 6)
+;{:y 5, :z 6, :c 3, :b 2, :x 4, :a 1}
+(dissoc m :a :c)
+;{:b 2}
 
+(def v [1 2 3])
+(get v 1)
+;2
+(get v 10)
+;nil
+(get v 10 "not-found")
+;"not-found"
+(assoc v
+       1 4
+       0 -12
+       2 :p)
+;[-12 4 :p]
+(assoc v 3 10)
+;[1 2 3 10]
+(def map22 #{1 2 3 4 6 8 9 12 15 17 20})        ;mapa nije sortirana
+(defn ima []
+  (when (get map22 15)               ;ako je 15 sadrzan u map22
+    (println "it contains `15`!")))
+(ima)
+;it contains `15`!
 
-
-
-
-
+(def map11 [1 2 3 4 6 8 9 12 15 17 20])
+(defn ima11 []
+  (let [i (atom 0)]
+    (doseq [x  map11]               ;sve promenjive iz map11 vrti od prve do zadnje i trenutnu vrednosr smesta u peomenjivu x
+      (swap! i inc)
+      (if (= x 15)(println @i "-ti clan" "je `15`!")))))
+;(ima11)
+;9 -ti clan je `15`!
 
 
 
