@@ -151,6 +151,9 @@
 ;(list* 0 1 2 3 (range 4 10))
 ;(0 1 2 3 4 5 6 7 8 9)
 
+;(lazy-seq 0 1 2 3 (range 4 10))
+;(4 5 6 7 8 9)
+
 ;(lazy-seq [1 2 3])
 ;(1 2 3)
 
@@ -206,6 +209,11 @@ realizing random number
 	([n] (cons n (lazy-seq (positive-numbers (inc n))))))
 ;(take 15 (positive-numbers))
 ;(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15)
+(defn positive-numbers11
+	([] (positive-numbers 1))
+	([n] (cons n (conj (positive-numbers (inc n))))))
+;(take 15 (positive-numbers11))
+;(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15)
 
 (defn fib [a b] 
   (cons a (lazy-seq (fib b (+ b a)))))
@@ -213,10 +221,78 @@ realizing random number
 ;(1 1 2 3 5 8 13 21 34)
 
 (defn sum-last-2 
-   ([] (sum-last-2 1 2)) 
-   ([n m] (cons n (lazy-seq (sum-last-2 m (+ n m))))))
+   ([] (sum-last-2 1 2))                                  ;ako je funkcija bez argumenata poziva samu sebe sa argumentima 1 i 2
+   ([n m] (println n m)                                   ;ako je funkcija pozvana sa dva argumenta
+          (cons n                                        
+                (lazy-seq 
+                  (sum-last-2 m (+ n m))))))         ;onda sabira ta dva broja i dodaje zbir na kraj vektora
 ;(take 9 (sum-last-2))
-;(1 2 3 5 8 13 21 34 55)
+#_(
+1 2
+2 3
+3 5
+5 8
+8 13
+13 21
+21 34
+34 55
+55 89
+(1 2 3 5 8 13 21 34 55)
+)
+
+(defn fib11 [a b] 
+  (cons a (conj (fib b (+ b a)))))
+;(take 9 (fib11 1 1))
+
+(lazy-seq (range 1 4)(range 1 10))
+;(1 2 3 4 5 6 7 8 9)
+(lazy-seq (range 1 10) (range 1 4))
+;(1 2 3)
+(cons (range 0 5) (range 0 2))
+;((0 1 2 3 4) 0 1)
+(conj (range 0 5) (range 0 2))
+;((0 1) 0 1 2 3 4)
+(conj (range 0 2) 7 5 6)
+;(6 5 7 0 1)
+(conj [7 5 6] [1 2])
+;[7 5 6 [1 2]]
+
+(repeatedly 10 (partial rand-int 50))
+;(44 3 19 27 41 44 29 31 45 0)
+
+#_(let [x31 (repeatedly 10 (partial rand-int 50))]
+  x31)
+
+(def x31 (repeatedly 10 (partial rand-int 50)))
+;(seq x31)
+
+(apply str (remove (set "aeiouy.")
+                   "vowels are useless! or maybe not..."))
+;"vwls r slss! r mb nt"
+
+(split-with neg? (range -5 5))         ;daje dva vektora
+;[(-5 -4 -3 -2 -1) (0 1 2 3 4)]
+
+#_(let [[t d] (split-with #(< % 12) (range 200000))]
+   [(count d) (count t)])
+;[1999988 12]
+ 
+(let [[t d] (split-with #(< % 12) (range 200000))]
+  [(count t) (count d)])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
