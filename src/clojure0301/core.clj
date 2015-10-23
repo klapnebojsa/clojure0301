@@ -260,7 +260,7 @@ realizing random number
 (repeatedly 10 (partial rand-int 50))
 ;(44 3 19 27 41 44 29 31 45 0)
 
-#_(let [x31 (repeatedly 10 (partial rand-int 50))]
+(let [x31 (repeatedly 10 (partial rand-int 50))]
   x31)
 
 (def x31 (repeatedly 10 (partial rand-int 50)))
@@ -318,8 +318,14 @@ realizing random number
 (defn ima []
   (when (get map22 15)               ;ako je 15 sadrzan u map22
     (println "it contains `15`!")))
-(ima)
+;(ima)
 ;it contains `15`!
+
+(defn ima00 []
+  (contains? map22 17)               ;ako je 15 sadrzan u map22
+    (println "it contains `17`!"))
+;(ima00)
+;it contains `17`!
 
 (def map11 [1 2 3 4 6 8 9 12 15 17 20])
 (defn ima11 []
@@ -329,6 +335,151 @@ realizing random number
       (if (= x 15)(println @i "-ti clan" "je `15`!")))))
 ;(ima11)
 ;9 -ti clan je `15`!
+
+(if-let [e (find {:a 5 :b 6} :a)]
+  (format "found %s => %s" (key e) (val e))
+  "not found")
+;"found :a => 5"
+(if-let [[k v] (find {:a 5 :b 6} :b)]
+  (format "found %s => %s" k v)
+  "not found")
+;"found :b => 6"
+
+(nth [:a :b :c] 2)
+;:c
+(get [:a :b :c] 2)
+;:c
+;(nth [:a :b :c] 3)
+;= java.lang.IndexOutOfBoundsException
+(get [:a :b :c] 3)
+;nil
+;(nth [:a :b :c] -1)
+;java.lang.IndexOutOfBoundsException
+(get [:a :b :c] -1)
+;nil
+(nth [:a :b :c] -1 :not-found)
+;:not-found
+(get [:a :b :c] -1 :not-found)
+;:not-found
+
+                                  ;Example 3-4. Using a list as a stack
+(conj '() 1)
+;(1)
+(conj '(2 1) 3)
+;(3 2 1)
+(peek '(41 5 7 3 2 1))
+;41
+(pop '(10 11 3 2 1))
+;(11 3 2 1)
+(pop '(1))
+;()
+                                  ;Example 3-5. Using a vector as a stack
+(conj [] 1)
+;[1]
+(conj [1 2] 3 4 5)
+;[1 2 3 4 5]
+(peek [1 2 3 4 5 8])
+;8
+(pop [1 2 3 4 8 9 10 12])
+;[1 2 3 4 8 9 10]
+(pop [1])
+;[]
+
+(def sm (sorted-map :z 5 :x 9 :y 0 :b 2 :a 3 :c 4))
+sm
+;{:a 3, :b 2, :c 4, :x 9, :y 0, :z 5}
+(rseq sm)                                        ;sortirano unazad po imenu promenjive
+;([:z 5] [:y 0] [:x 9] [:c 4] [:b 2] [:a 3])       
+(subseq sm <= :x)                                ;sortiranu uzlazno po imenu promenjive uz ispunjenje uslova po menu promenjive
+;([:a 3] [:b 2] [:c 4] [:x 9])  
+(subseq sm > :b <= :y)
+;([:c 4] [:x 9] [:y 0])
+(rsubseq sm > :b <= :z)                          ;sortirano silazno po imenu promenjive uz ispunjenje uslova po menu promenjive
+;([:z 5] [:y 0] [:x 9] [:c 4])
+
+(compare 2 2)                      ;isti
+;0
+(compare "ab" "abc")               ;drugi veci
+;-1
+(compare ["a" "b" "c"] ["a" "b"])  ;prvi veci
+;1
+(compare ["a" 2] ["a" 2 0])        ;drugi veci
+;-1
+
+(sort < (repeatedly 10 #(rand-int 100)))
+;(0 0 16 19 19 32 34 42 66 74)
+(sort-by first > (map-indexed vector "Clojure"))
+;([6 \e] [5 \r] [4 \u] [3 \j] [2 \o] [1 \l] [0 \C])
+
+(sorted-map-by compare :z 5 :x 9 :y 0 :b 2 :a 3 :c 4)            ;raastuci
+;= {:a 3, :b 2, :c 4, :x 9, :y 0, :z 5}
+(sorted-map-by (comp - compare) :z 5 :x 9 :y 0 :b 2 :a 3 :c 4)   ;opadajuci
+;= {:z 5, :y 0, :x 9, :c 4, :b 2, :a 3}
+
+(defn magnitude
+  [x]
+  (-> x Math/log10 Math/floor))   ;odseca decimale
+
+(defn magnitude1
+  [x]
+  (Math/floor(Math/log10 x)))     ;odseca decimale
+
+(magnitude 10)
+;1.0
+(magnitude 75)
+;1.0
+(magnitude 100)
+;2.0
+(magnitude 10000)
+;4.0
+
+(defn interpolate
+  "Takes a collection of points (as [x y] tuples), returning a function
+   which is a linear interpolation between those points."
+  [points]
+  (let [results (into (sorted-map) (map vec points))]
+    (println "POCETAK Unete pocetne tacke" results)
+    (fn [x]
+      (println "-------------------------")
+      (println "Uneta x koordinata" x "je")
+      (let [[xa ya] (first (rsubseq results <= x))
+            [xb yb] (first (subseq results > x))]
+        (println "izmedju tacaka (" xa ya ") i (" xb yb ")")
+        (if (and xa xb)
+          (do
+            (println "Tacke postoje. Racuna se vrednost")
+            (let [y (/ (+ (* ya (- xb x)) (* yb (- x xa)))
+                       (- xb xa))]
+              (println "Vrednost y za x" xb "je" y)))
+          (println "Tacke NE postoje. Nema definicije funkcije u datom intervalu."))))))
+(def f (interpolate [[0 0] [10 10] [15 5]]))    ;definise poznate tacke
+(map f [2 10 12 30])                            ;x vrednosti tacaka za koje se trazi vrednost y
+
+#_(POCETAK Unete pocetne tacke {0 0, 10 10, 15 5}
+-------------------------
+Uneta x koordinata 2 je
+izmedju tacaka ( 0 0 ) i ( 10 10 )
+Tacke postoje. Racuna se vrednost
+Vrednost y za x 10 je 2
+-------------------------
+Uneta x koordinata 10 je
+izmedju tacaka ( 10 10 ) i ( 15 5 )
+Tacke postoje. Racuna se vrednost
+Vrednost y za x 15 je 10
+-------------------------
+Uneta x koordinata 12 je
+izmedju tacaka ( 10 10 ) i ( 15 5 )
+Tacke postoje. Racuna se vrednost
+Vrednost y za x 15 je 8
+-------------------------
+Uneta x koordinata 30 je
+izmedju tacaka ( 15 5 ) i ( nil nil )
+Tacke NE postoje. Nema definicije funkcije u datom intervalu.)
+
+
+
+
+
 
 
 
